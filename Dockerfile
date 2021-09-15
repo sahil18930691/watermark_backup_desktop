@@ -3,7 +3,7 @@ FROM python:3.8
 # To get output of print statements on console
 ENV PYTHONUNBUFFERED 0
 
-ENV ERROR_LOGFILE /api/logs/gunicorn-error.log
+ENV ERROR_LOGFILE /logs/gunicorn-error.log
 
 # Setting up API
 WORKDIR /api
@@ -29,6 +29,4 @@ COPY api .
 ENV PORT="${PORT:-7070}"
 
 # Docker entrypoint
-CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers=4 -k uvicorn.workers.UvicornWorker \
---error-logfile=$ERROR_LOGFILE \
---capture-output
+CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers=4 -k uvicorn.workers.UvicornWorker --error-logfile=$ERROR_LOGFILE 
