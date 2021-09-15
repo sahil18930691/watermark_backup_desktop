@@ -14,17 +14,17 @@ RUN pip install --upgrade pip && pip install --trusted-host pypi.python.org --us
 COPY api .
 
 # Testing code before spinning up the API
-WORKDIR /tests
+# WORKDIR /tests
 
-COPY tests .
+# COPY tests .
 
-RUN pytest
+# RUN pytest
 
-WORKDIR /api
+# WORKDIR /api
 
-RUN rm -rf ../tests
+# RUN rm -rf ../tests
 
-ENV PORT="${PORT:-8080}"
+ENV PORT="${PORT:-7070}"
 
 # Docker entrypoint
 CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers=4 -k uvicorn.workers.UvicornWorker
