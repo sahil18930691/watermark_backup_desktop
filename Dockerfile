@@ -3,7 +3,7 @@ FROM python:3.8
 # To get output of print statements on console
 ENV PYTHONUNBUFFERED 0
 
-ENV ERROR_LOGFILE /logs/gunicorn-error.log
+ENV ERROR_LOGFILE /api/logs/gunicorn-error.log
 
 # Setting up API
 WORKDIR /api
