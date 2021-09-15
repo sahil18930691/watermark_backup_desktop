@@ -58,15 +58,19 @@ async def get_image_properties(URL, width_percentage=None, position=None):
         filename = filename.strip()
     except Exception as e:
         print(e)
+        logger.info("Error: HTTPException(status_code=406, detail=Not a valid URL)")
         raise HTTPException(status_code=406, detail="Not a valid URL")
  
     if URL.lower().endswith((".jpg", ".png", ".jpeg", ".gif", ".webp")) == False:
+        logger.info("Error: HTTPException(status_code=406, detail=Not a valid URL)")
         raise HTTPException(status_code=406, detail="Not a valid URL")
  
     if width_percentage and width_percentage > 1:
+        logger.info("Error: HTTPException(status_code=406, detail=Please chose the value of width_percentage between 0.01 and 1.0)")
         raise HTTPException(status_code=406, detail="Please chose the value of width_percentage between 0.01 and 1.0")
  
     if position and position not in POSI_LIST:
+        logger.info("Error: HTTPException(status_code=406, detail=Please chose a value of position from")
         raise HTTPException(status_code=406, detail="Please chose a value of position from: " + ", ".join(POSI_LIST))
  
    
@@ -79,6 +83,7 @@ async def get_image_properties(URL, width_percentage=None, position=None):
                 contents = await resp.read()
  
         if contents == None:
+            logger.info("Error: HTTPException(status_code=406, detail=No image found.")
             raise HTTPException(status_code=406, detail="No image found.")
  
         original_image = Image.open(BytesIO(contents))
@@ -86,6 +91,7 @@ async def get_image_properties(URL, width_percentage=None, position=None):
 
     except Exception as e:
         print(e)
+        logger.info("Error: while reading the image. Make sure that the URL is a correct image link.")
         raise HTTPException(status_code=400, detail="Error while reading the image. Make sure that the URL is a correct image link.")
     
     return filename, original_image
@@ -508,10 +514,11 @@ async def enhancement_logo(image_details: ImageDetails):
             
     except Exception as e:
             print(e)
+            logger.info("Error: detail=Error while processing the image.")
             raise HTTPException(status_code=500, detail="Error while processing the image.")
     buf.seek(0)
 
-
+    print()
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 @app.post("/addWatermark")
