@@ -29,5 +29,11 @@ COPY api .
 ENV PORT="${PORT:-7070}"
 
 # Docker entrypoint
-CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers=4 -k uvicorn.workers.UvicornWorker  --log-level=info 
-    --error-logfile=$ERROR_LOGFILE --capture-output
+CMD gunicorn main:app \
+    --bind 0.0.0.0:$PORT \
+    --workers=4 \
+    --timeout 60 \
+    -k uvicorn.workers.UvicornWorker \
+    --log-level=info \
+    --error-logfile=$ERROR_LOGFILE \
+    --capture-output
