@@ -136,6 +136,7 @@ def paste_logo(original_image, width_percentage, logo, position="centre"):
  
  
 def get_format(filename):
+    #output_variable = filename
     format_ = filename.split(".")[-1]
     if format_.lower() == "jpg":
         format_ = "jpeg"
@@ -143,7 +144,6 @@ def get_format(filename):
         format_ = "WebP"
  
     return format_
- 
  
 def get_content_type(format_):
     type_ = "image/jpeg"
@@ -155,6 +155,7 @@ def get_content_type(format_):
         type_ = "image/png"
 
     return type_
+
  
  
 def get_final_image(image_details, original_image, width_percentage, logo, position, filename):
@@ -177,6 +178,7 @@ async def get_body(URL):
     #this function get the format type of input image
     def get_format(filename):
         format_ = filename.split(".")[-1]
+        print(format_)
         if format_.lower() == "jpg":
             format_ = "jpeg"
         elif format_.lower == "webp":
@@ -476,6 +478,123 @@ async def enhancement(Enhance_image: str):
 
     return StreamingResponse(buffer, media_type=get_content_type(format_))
 
+
+
+
+@app.post("/enhancement_logo_without_ext")
+async def enhancement_logo_without_ext(image_details: ImageDetails):
+    """ 
+    #### The endpoint takes multiple parameters as inputs in the form of JSON ,enhance the image and then pastes the Square Yards logo as a watermark on the input images and then compresses it.\n
+    1. url_: Url of the image.
+    2. width_percentage: Size of watermark based on the width of the image. Range (0-1).
+    3. compression_info: Details regarding image compression.
+    4. position: position of logo on image.
+    """
+    URL1 = image_details.url_
+    URL = image_details.url_
+    logger.info(URL)
+    response = requests.get(URL)
+    #print(response)
+    img = Image.open(BytesIO(response.content))
+    #print(img)
+    #print(img.format.lower())
+
+    URL = URL + "." + img.format.lower()
+    
+    width_percentage = image_details.width_percentage
+
+    position = image_details.position
+
+    filename, original_image = await get_image_properties(URL, width_percentage, position)
+    original_image = await get_body(image_details.url_)
+    
+
+    try:
+
+        squareyard_logo = SQUARE_YARDS_LOGO.copy()
+        original_image, format_, quality = get_final_image(image_details, original_image, width_percentage, squareyard_logo, position, filename)
+        buf = BytesIO()
+        if format_ == 'gif':
+            frames = [get_final_image(image_details, frame.copy(), width_percentage, squareyard_logo, position, filename)[0] for frame in ImageSequence.Iterator(original_image)]
+            frames[0].save(buf, save_all=True, append_images=frames[1:], format=format_, quality=quality, optimize=True)
+        elif format_ == 'png':
+            format_ = 'webp'
+            original_image.save(buf, format=format_, quality = 70, optimize=True)
+        else:
+            original_image.save(buf, format=format_, quality = 70, optimize=True)
+
+            
+    except Exception as e:
+            print(e)
+            logger.info("Error: detail=Error while processing the image.")
+            raise HTTPException(status_code=500, detail="Error while processing the image.")
+    buf.seek(0)
+
+    URL = image_details.url_
+    #print("after ",URL)
+ 
+    filename = filename.removesuffix(filename.split(".")[-1])
+    #print(filename)
+ 
+    filename = filename.removesuffix(".")
+    #print(filename)
+    
+    
+    return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
+
+'''
+@app.post("/enhancement_logo_without_ext")
+async def enhancement_logo_without_ext(image_details: ImageDetails):
+    """ 
+    #### The endpoint takes multiple parameters as inputs in the form of JSON ,enhance the image and then pastes the Square Yards logo as a watermark on the input images and then compresses it.\n
+    1. url_: Url of the image.
+    2. width_percentage: Size of watermark based on the width of the image. Range (0-1).
+    3. compression_info: Details regarding image compression.
+    4. position: position of logo on image.
+    """
+    URL1 = image_details.url_
+    URL = image_details.url_
+    logger.info(URL)
+    response = requests.get(URL)
+    #print(response)
+    img = Image.open(BytesIO(response.content))
+    #print(img)
+    #print(img.format.lower())
+
+    URL = URL + "." + img.format.lower()
+    
+    width_percentage = image_details.width_percentage
+
+    position = image_details.position
+
+    filename, original_image = await get_image_properties(URL, width_percentage, position)
+    original_image = await get_body(image_details.url_)
+    
+
+    try:
+
+        squareyard_logo = SQUARE_YARDS_LOGO.copy()
+        original_image, format_, quality = get_final_image(image_details, original_image, width_percentage, squareyard_logo, position, filename)
+        buf = BytesIO()
+        if format_ == 'gif':
+            frames = [get_final_image(image_details, frame.copy(), width_percentage, squareyard_logo, position, filename)[0] for frame in ImageSequence.Iterator(original_image)]
+            frames[0].save(buf, save_all=True, append_images=frames[1:], format=format_, quality=quality, optimize=True)
+        elif format_ == 'png':
+            format_ = 'webp'
+            original_image.save(buf, format=format_, quality = 70, optimize=True)
+        else:
+            original_image.save(buf, format=format_, quality = 70, optimize=True)
+
+            
+    except Exception as e:
+            print(e)
+            logger.info("Error: detail=Error while processing the image.")
+            raise HTTPException(status_code=500, detail="Error while processing the image.")
+    buf.seek(0)
+    
+    
+    return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(URL1,)})
+'''
 
 @app.post("/enhancement_logo")
 async def enhancement_logo(image_details: ImageDetails):
