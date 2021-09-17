@@ -530,13 +530,12 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
             raise HTTPException(status_code=500, detail="Error while processing the image.")
     buf.seek(0)
 
-    URL = image_details.url_
-    #print("after ",URL)
- 
-    filename = filename.removesuffix(filename.split(".")[-1])
-    #print(filename)
- 
-    filename = filename.removesuffix(".")
+    filename = filename.replace(filename.split(".")[-1], '')
+    
+
+
+    filename = filename.replace(".","")
+    
     #print(filename)
     
     
