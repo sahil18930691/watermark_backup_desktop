@@ -541,8 +541,8 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
-'''
-@app.post("/enhancement_logo_without_ext")
+
+@app.post("/enhancement_logo_without_ext2")
 async def enhancement_logo_without_ext(image_details: ImageDetails):
     """ 
     #### The endpoint takes multiple parameters as inputs in the form of JSON ,enhance the image and then pastes the Square Yards logo as a watermark on the input images and then compresses it.\n
@@ -592,8 +592,8 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     buf.seek(0)
     
     
-    return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(URL1,)})
-'''
+    return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
+
 
 @app.post("/enhancement_logo")
 async def enhancement_logo(image_details: ImageDetails):
