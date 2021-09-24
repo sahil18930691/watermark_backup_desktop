@@ -88,6 +88,7 @@ async def get_image_properties(URL, width_percentage=None, position=None):
  
         original_image = Image.open(BytesIO(contents))
         
+        
 
     except Exception as e:
         print(e)
@@ -164,6 +165,21 @@ def get_final_image(image_details, original_image, width_percentage, logo, posit
     quality = 70
 
     return original_image, format_, quality
+
+class CallCounted:
+    """Decorator to determine number of calls for a method"""
+
+    def __init__(self,method):
+        self.method=method
+        self.counter=0
+
+    def __call__(self,*args,**kwargs):
+        self.counter+=1
+        return self.method(*args,**kwargs)
+
+
+
+
 
 async def get_body(URL):
 
@@ -318,7 +334,6 @@ async def get_body(URL):
 
     #return StreamingResponse(buffer, media_type=get_content_type(format_))
     original_image = image
-    
     return original_image
 
 @app.get("/enhancement")
@@ -475,7 +490,8 @@ async def enhancement(Enhance_image: str):
     buffer = BytesIO()
     image.save(buffer, format=format_, quality=100)
     buffer.seek(0)
-
+    
+    logger.info("Result: Successful")
     return StreamingResponse(buffer, media_type=get_content_type(format_))
 
 
@@ -501,13 +517,15 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
 
     URL = URL + "." + img.format.lower()
     
+    count1 = 0
+
     width_percentage = image_details.width_percentage
 
     position = image_details.position
 
     filename, original_image = await get_image_properties(URL, width_percentage, position)
     original_image = await get_body(image_details.url_)
-    
+
 
     try:
 
@@ -537,8 +555,11 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     filename = filename.replace(".","")
     
     #print(filename)
-    
-    
+    success_logs = CallCounted(logger.info("Result: Successful"))
+    #logging.error('one')
+    #logging.error('two')
+    logger.info("Result: Successful")
+    print(success_logs.counter)
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 
@@ -591,7 +612,7 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
             raise HTTPException(status_code=500, detail="Error while processing the image.")
     buf.seek(0)
     
-    
+    logger.info("Result: Successful")
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 
@@ -637,6 +658,7 @@ async def enhancement_logo(image_details: ImageDetails):
     buf.seek(0)
 
     print()
+    logger.info("Result: Successful")
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 @app.post("/addWatermark")
@@ -674,7 +696,7 @@ async def add_watermark(image_details: ImageDetails):
             raise HTTPException(status_code=500, detail="Error while processing the image.")
     buf.seek(0)
 
-
+    logger.info("Result: Successful")
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
  
  
@@ -706,7 +728,9 @@ async def add_watermarkIC(image_details: ImageDetails):
             print(e)
             raise HTTPException(status_code=500, detail="Error while processing the image.")
     buf.seek(0)
+    logger.info("Result: Successful")
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
+
 '''
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8003, reload = True)'''
