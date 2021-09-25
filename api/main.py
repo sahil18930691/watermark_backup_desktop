@@ -50,7 +50,32 @@ def extract_filename(URL):
     parsed = urlparse(URL)
     return os.path.basename(parsed.path)
  
- 
+sample_list_for_without_exten2=[]
+
+def sample_list_ext2(L):
+    sample_list_for_without_exten2.append(L)
+    #print(sample_list_for_without_exten2)
+
+total_request_extension2=[]
+
+def total_req_ext2(k):
+    total_request_extension2.append(k)
+    #print(total_request_extension2)
+
+
+sample_list_for_logo_enhancement=[]
+
+def sample_list_logo_enhancement(L):
+    sample_list_for_logo_enhancement.append(L)
+    #print(sample_list_for_logo_enhancement)
+
+total_request_logo_enhancement=[]
+
+def total_req_logo_enhancement(k):
+    total_request_logo_enhancement.append(k)
+    #print(total_request_logo_enhancement)
+
+
 async def get_image_properties(URL, width_percentage=None, position=None):
     filename = None
     try:
@@ -99,42 +124,48 @@ async def get_image_properties(URL, width_percentage=None, position=None):
  
  
 def paste_logo(original_image, width_percentage, logo, position="centre"):
+
+    try:
+        logo_width = int(original_image.size[0]*width_percentage)
+        logo_height = int(logo.size[1]*(logo_width/logo.size[0]))
  
-    logo_width = int(original_image.size[0]*width_percentage)
-    logo_height = int(logo.size[1]*(logo_width/logo.size[0]))
- 
-    if logo_height > original_image.size[1]:
-        logo_height = original_image.size[1]
+        if logo_height > original_image.size[1]:
+            logo_height = original_image.size[1]
     
-    if position == "centre":
-        logo = logo.resize((logo_width, logo_height))
+        if position == "centre":
+            logo = logo.resize((logo_width, logo_height))
  
-        top = (original_image.size[1]//2) - (logo_height//2)
-        left = (original_image.size[0]//2) - (logo_width//2)
-        original_image.paste(logo, (left, top), mask=logo)
+            top = (original_image.size[1]//2) - (logo_height//2)
+            left = (original_image.size[0]//2) - (logo_width//2)
+            original_image.paste(logo, (left, top), mask=logo)
  
-    elif position == "bottom_right":
-        logo = logo.resize((logo_width, logo_height))
+        elif position == "bottom_right":
+            logo = logo.resize((logo_width, logo_height))
  
-        top = original_image.size[1] - logo_height
-        left = original_image.size[0] - logo_width
-        original_image.paste(logo, (left, top), mask=logo)
+            top = original_image.size[1] - logo_height
+            left = original_image.size[0] - logo_width
+            original_image.paste(logo, (left, top), mask=logo)
  
-    elif position == "bottom_left":
-        logo = logo.resize((logo_width, logo_height))
+        elif position == "bottom_left":
+            logo = logo.resize((logo_width, logo_height))
  
-        top = original_image.size[1] - logo_height
-        left = 0
-        original_image.paste(logo, (left, top), mask=logo)
-    elif position == "bottom":
-        logo = logo.resize((logo_width, logo_height))
+            top = original_image.size[1] - logo_height
+            left = 0
+            original_image.paste(logo, (left, top), mask=logo)
+    
+        elif position == "bottom":
+            logo = logo.resize((logo_width, logo_height))
  
-        top = original_image.size[1] - logo_height
-        left = (original_image.size[0]//2) - (logo_width//2)
-        original_image.paste(logo, (left, top), mask=logo)
- 
-    return original_image
- 
+            top = original_image.size[1] - logo_height
+            left = (original_image.size[0]//2) - (logo_width//2)
+            original_image.paste(logo, (left, top), mask=logo)
+        logger.info("logo added successfully")
+        return original_image
+    
+    except Exception as e:
+        print(e)
+        logger.info("logo adding unsuccessful")
+        pass
  
 def get_format(filename):
     #output_variable = filename
@@ -160,22 +191,19 @@ def get_content_type(format_):
  
  
 def get_final_image(image_details, original_image, width_percentage, logo, position, filename):
-    original_image = paste_logo(original_image, width_percentage, logo, position)
-    format_ = get_format(filename)
-    quality = 70
 
-    return original_image, format_, quality
+    try:
+        original_image = paste_logo(original_image, width_percentage, logo, position)
+        format_ = get_format(filename)
+        quality = 70
+        logger.info("compression successful")
+        return original_image, format_, quality
 
-class CallCounted:
-    """Decorator to determine number of calls for a method"""
-
-    def __init__(self,method):
-        self.method=method
-        self.counter=0
-
-    def __call__(self,*args,**kwargs):
-        self.counter+=1
-        return self.method(*args,**kwargs)
+    except Exception as e:
+        print(e)
+        logger.info("compression unsuccessful")    
+        pass
+    
 
 
 
@@ -192,149 +220,144 @@ async def get_body(URL):
     filename = URL
     #print(filename)
     #this function get the format type of input image
-    def get_format(filename):
-        format_ = filename.split(".")[-1]
-        print(format_)
-        if format_.lower() == "jpg":
-            format_ = "jpeg"
-        elif format_.lower == "webp":
-            format_ = "WebP"
+
+    try:
+        def get_format(filename):
+            format_ = filename.split(".")[-1]
+            print(format_)
+            if format_.lower() == "jpg":
+                format_ = "jpeg"
+            elif format_.lower == "webp":
+                format_ = "WebP"
     
-        return format_
- 
+            return format_
+
+            #this function for gave the same type of format to output
+        def get_content_type(format_):
+            type_ = "image/jpeg"
+            if format_ == "gif":
+                type_ = "image/gif"
+            elif format_ == "webp":
+                type_ = "image/webp"
+            elif format_ == "png":
+                type_ = "image/png"
+            #print(type_)
+            return type_
+
+        format_ = get_format(filename)#here format_ store the type of image by filename    
    
-    #this function for gave the same type of format to output
-    def get_content_type(format_):
-        type_ = "image/jpeg"
-        if format_ == "gif":
-            type_ = "image/gif"
-        elif format_ == "webp":
-            type_ = "image/webp"
-        elif format_ == "png":
-            type_ = "image/png"
-        #print(type_)
-        return type_
 
-    format_ = get_format(filename)#here format_ store the type of image by filename
+        #This function calculate the brightness of input image 
+        def calculate_brightness(image):
+            greyscale_image = image.convert('L')
+            histogram = greyscale_image.histogram()
+            pixels = sum(histogram)
+            brightness = scale = len(histogram)
+
+            for index in range(0, scale):
+                ratio = histogram[index] / pixels
+                brightness += ratio * (-scale + index)
+
+            return 1 if brightness == 255 else brightness / scale
     
+        #print(calculate_brightness(image))#here print the float(calculate brightnes nummber)
     
-    #This function calculate the brightness of input image 
-    def calculate_brightness(image):
-        greyscale_image = image.convert('L')
-        histogram = greyscale_image.histogram()
-        pixels = sum(histogram)
-        brightness = scale = len(histogram)
 
-        for index in range(0, scale):
-            ratio = histogram[index] / pixels
-            brightness += ratio * (-scale + index)
-
-        return 1 if brightness == 255 else brightness / scale
-    
-    #print(calculate_brightness(image))#here print the float(calculate brightnes nummber)
-
+        #______Here apply the Brightness and Color on image automatically according to there condition_____
+        if (calculate_brightness(image) > 0.6 and calculate_brightness(image) < 0.7 ): 
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(1.2)
+            #print("bright 6")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.4)
+                #print("color 6")
                   
-    #______Here apply the Brightness and Color on image automatically according to there condition_____
-    if (calculate_brightness(image) > 0.6 and calculate_brightness(image) < 0.7 ): 
+        if (calculate_brightness(image) > 0.5 and calculate_brightness(image) < 0.6): 
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(1.2)
+            #print("bright 5")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.8)
+                #print("color 5")
+
         
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(1.2)
-        #print("bright 6")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.4)
-            #print("color 6")
-     
+        if (calculate_brightness(image)  > 0.4 and calculate_brightness(image) < 0.5 ):
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(1.2)
+            print("bright 4")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.5)
+                #print("color 4")
 
-    if (calculate_brightness(image) > 0.5 and calculate_brightness(image) < 0.6): 
-            
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(1.2)
-        #print("bright 5")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.8)
-            #print("color 5")
-
-
-
-    if (calculate_brightness(image)  > 0.4 and calculate_brightness(image) < 0.5 ):
         
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(1.2)
-        print("bright 4")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.5)
-            #print("color 4")
+        if (calculate_brightness(image)  > 0.3 and calculate_brightness(image) < 0.4):
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(1.7)
+            #print("bright 3")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.5)
+                #print("color 3")
 
-
-    if (calculate_brightness(image)  > 0.3 and calculate_brightness(image) < 0.4):
-            
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(1.7)
-        #print("bright 3")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.5)
-            #print("color 3")
-
-
-    if (calculate_brightness(image)  > 0.2 and calculate_brightness(image) < 0.3 ):
         
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(1.8)
-        #print("bright 2")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.5)
-            #print("color 2")
+        if (calculate_brightness(image)  > 0.2 and calculate_brightness(image) < 0.3 ):
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(1.8)
+            #print("bright 2")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.5)
+                #print("color 2")
 
+        if (calculate_brightness(image)  > 0.1 and calculate_brightness(image) < 0.2):
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(2.0)
+            #print("bright 1")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.6)
+                #print("color 1")
 
-    if (calculate_brightness(image)  > 0.1 and calculate_brightness(image) < 0.2):
-            
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(2.0)
-        #print("bright 1")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.6)
-            #print("color 1")
+        if (calculate_brightness(image)  > 0.001 and calculate_brightness(image) < 0.1 ):
+            enhancer_bright = ImageEnhance.Brightness(image)
+            image = enhancer_bright.enhance(2.0)
+            #print("bright 001")
+            if image:
+                enhancer_colors = ImageEnhance.Color(image)
+                image = enhancer_colors.enhance(1.6)
+                print("color 001")
 
+        def calculate_brightness(image):
+            greyscale_image = image.convert('L')
+            histogram = greyscale_image.histogram()
+            pixels = sum(histogram)
+            brightness = scale = len(histogram)
 
-    if (calculate_brightness(image)  > 0.001 and calculate_brightness(image) < 0.1 ):
-        
-        enhancer_bright = ImageEnhance.Brightness(image)
-        image = enhancer_bright.enhance(2.0)
-        #print("bright 001")
-        if image:
-            enhancer_colors = ImageEnhance.Color(image)
-            image = enhancer_colors.enhance(1.6)
-            print("color 001")
+            for index in range(0, scale):
+                ratio = histogram[index] / pixels
+                brightness += ratio * (-scale + index)
 
+            return 1 if brightness == 255 else brightness / scale
     
-    def calculate_brightness(image):
-        greyscale_image = image.convert('L')
-        histogram = greyscale_image.histogram()
-        pixels = sum(histogram)
-        brightness = scale = len(histogram)
-
-        for index in range(0, scale):
-            ratio = histogram[index] / pixels
-            brightness += ratio * (-scale + index)
-
-        return 1 if brightness == 255 else brightness / scale
-    
-    #print("after",calculate_brightness(image))
+        #print("after",calculate_brightness(image))
     
 
-    #buffer = BytesIO()
-    #image.save(buffer, format=format_, quality=100)
-    #buffer.seek(0)
+        #buffer = BytesIO()
+        #image.save(buffer, format=format_, quality=100)
+        #buffer.seek(0)
 
-    #return StreamingResponse(buffer, media_type=get_content_type(format_))
-    original_image = image
-    return original_image
+        #return StreamingResponse(buffer, media_type=get_content_type(format_))
+        original_image = image
+        logger.info("Enhancement Successful")
+        return original_image
+
+    except Exception as e:
+        print(e)
+        logger.info("Enhancement Unsuccessful")
+        pass
 
 @app.get("/enhancement")
 async def enhancement(Enhance_image: str):
@@ -497,6 +520,7 @@ async def enhancement(Enhance_image: str):
 
 
 
+
 @app.post("/enhancement_logo_without_ext")
 async def enhancement_logo_without_ext(image_details: ImageDetails):
     """ 
@@ -517,7 +541,6 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
 
     URL = URL + "." + img.format.lower()
     
-    count1 = 0
 
     width_percentage = image_details.width_percentage
 
@@ -554,12 +577,11 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
 
     filename = filename.replace(".","")
     
-    #print(filename)
-    success_logs = CallCounted(logger.info("Result: Successful"))
-    #logging.error('one')
-    #logging.error('two')
+    
     logger.info("Result: Successful")
-    print(success_logs.counter)
+    #sample_list.append("successful")
+    
+    
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 
@@ -575,6 +597,8 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     URL1 = image_details.url_
     URL = image_details.url_
     logger.info(URL)
+    total_req_ext2(1)
+    logger.info("Total number of request without ext2: {}".format(total_request_extension2.count(1)))
     response = requests.get(URL)
     #print(response)
     img = Image.open(BytesIO(response.content))
@@ -613,6 +637,8 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     buf.seek(0)
     
     logger.info("Result: Successful")
+    s1=sample_list_ext2(1)
+    logger.info("Successful Response without ext2: {}".format(sample_list_for_without_exten2.count(1)))
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 
@@ -627,6 +653,8 @@ async def enhancement_logo(image_details: ImageDetails):
     """
     URL = image_details.url_
     logger.info(URL)
+    total_req_logo_enhancement(1)
+    logger.info("Total number of request logo enhancement: {}".format(total_request_logo_enhancement.count(1)))
     width_percentage = image_details.width_percentage
 
     position = image_details.position
@@ -659,6 +687,8 @@ async def enhancement_logo(image_details: ImageDetails):
 
     print()
     logger.info("Result: Successful")
+    sample_list_logo_enhancement(1)
+    logger.info("Successful Response logo enhancement: {}".format(sample_list_for_logo_enhancement.count(1)))
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
 @app.post("/addWatermark")
