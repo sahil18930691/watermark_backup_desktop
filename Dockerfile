@@ -1,4 +1,5 @@
 FROM python:3.8
+FROM mongo:latest
 
 # To get output of print statements on console
 ENV PYTHONUNBUFFERED 0
@@ -11,7 +12,8 @@ WORKDIR /api
 COPY requirements.txt .
 
 # Installing API dependencies other than object detection API and Tensorflow
-RUN pip install --upgrade pip && pip install --trusted-host pypi.python.org --use-deprecated=legacy-resolver -r requirements.txt
+RUN pip install --upgrade pip && pip install --trusted-host pypi.python.org --use-deprecated=legacy-resolver -r requirements.txt && \
+RUN pip install pymongo
 
 COPY api .
 
