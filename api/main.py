@@ -12,6 +12,10 @@ from fastapi.responses import HTMLResponse
 import logfile
 from logfile import logger
 
+import pymongo
+from pymongo import MongoClient
+import certifi
+
 import io
 import PIL
 from PIL import Image, ImageEnhance
@@ -22,6 +26,9 @@ from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 import uvicorn
+
+
+ca = certifi.where()
 
 SQUARE_YARDS_LOGO = Image.open('./slogo.png')
 IC_LOGO = Image.open('./iclogo2.png')
@@ -49,6 +56,19 @@ class ImageDetails(BaseModel):
 def extract_filename(URL):
     parsed = urlparse(URL)
     return os.path.basename(parsed.path)
+
+sample_list_for_without_exten=[]
+
+def sample_list_ext(L):
+    sample_list_for_without_exten.append(L)
+    print(sample_list_for_without_exten)
+
+total_request_extension=[]
+
+def total_req_ext(k):
+    total_request_extension.append(k)
+    print(total_request_extension)
+
  
 sample_list_for_without_exten2=[]
 
@@ -74,6 +94,15 @@ total_request_logo_enhancement=[]
 def total_req_logo_enhancement(k):
     total_request_logo_enhancement.append(k)
     print(total_request_logo_enhancement)
+
+try:
+    cluster=MongoClient("mongodb+srv://kshitij1806:squareyards123@cluster0.vrnbg.mongodb.net/watermark_database?retryWrites=true&w=majority", tlsCAFile=ca)
+    db = cluster["watermark_database"]
+    collection = db["watermark_collection"]
+except:
+    pass    
+
+post = {"Img_url": "", "Enhancement": "", "Watermark": "", "Compression": "", "Result":""}
 
 
 async def get_image_properties(URL, width_percentage=None, position=None):
@@ -101,11 +130,35 @@ async def get_image_properties(URL, width_percentage=None, position=None):
    
     contents = None
     original_image = None
+    '''
     try:
+
+        
+        response = requests.get(URL)
+        print(URL)
+        img = Image.open(BytesIO(response.content))
+        original_image = img
+        print(original_image)
+        
+        
+        print(URL)
+        response = requests.get(URL)
+        original_image=Image.open(BytesIO(response.content))
+        print(original_image)
+
+
+
+
+        
+        
         # contents = requests.get(URL, timeout=10).content
         async with aiohttp.ClientSession() as session:
             async with session.get(URL) as resp:
-                contents = await resp.read()
+                contents = await resp.read().decode('utf-8')
+                print(contents)
+                
+
+
  
         if contents == None:
             logger.info("Error: HTTPException(status_code=406, detail=No image found.")
@@ -119,7 +172,8 @@ async def get_image_properties(URL, width_percentage=None, position=None):
         print(e)
         logger.info("Error: while reading the image. Make sure that the URL is a correct image link.")
         raise HTTPException(status_code=400, detail="Error while reading the image. Make sure that the URL is a correct image link.")
-    
+        pass
+    '''
     return filename, original_image
  
  
@@ -160,11 +214,14 @@ def paste_logo(original_image, width_percentage, logo, position="centre"):
             left = (original_image.size[0]//2) - (logo_width//2)
             original_image.paste(logo, (left, top), mask=logo)
         logger.info("logo added successfully")
+        post["Watermark"]=True
+        #post = {"Img_url": "", "Enhancement": "", "Watermark": True, "Compression": "", "Result":""}
         return original_image
     
     except Exception as e:
         print(e)
         logger.info("logo adding unsuccessful")
+        post["Watermark"]=False
         pass
  
 def get_format(filename):
@@ -197,11 +254,14 @@ def get_final_image(image_details, original_image, width_percentage, logo, posit
         format_ = get_format(filename)
         quality = 70
         logger.info("compression successful")
+        post["Compression"]=True
+        #post = {"Img_url": URL, "Enhancement": "", "Watermark": "", "Compression": True, "Result":""}
         return original_image, format_, quality
 
     except Exception as e:
         print(e)
-        logger.info("compression unsuccessful")    
+        logger.info("compression unsuccessful")
+        post["Compression"]=False  
         pass
     
 
@@ -224,7 +284,6 @@ async def get_body(URL):
     try:
         def get_format(filename):
             format_ = filename.split(".")[-1]
-            print(format_)
             if format_.lower() == "jpg":
                 format_ = "jpeg"
             elif format_.lower == "webp":
@@ -286,7 +345,7 @@ async def get_body(URL):
         if (calculate_brightness(image)  > 0.4 and calculate_brightness(image) < 0.5 ):
             enhancer_bright = ImageEnhance.Brightness(image)
             image = enhancer_bright.enhance(1.2)
-            print("bright 4")
+            #print("bright 4")
             if image:
                 enhancer_colors = ImageEnhance.Color(image)
                 image = enhancer_colors.enhance(1.5)
@@ -352,11 +411,14 @@ async def get_body(URL):
         #return StreamingResponse(buffer, media_type=get_content_type(format_))
         original_image = image
         logger.info("Enhancement Successful")
+        post["Enhancement"]=True
+        #post = {"Img_url": URL, "Enhancement": True, "Watermark": bool, "Compression": bool, "Result":""}
         return original_image
 
     except Exception as e:
         print(e)
         logger.info("Enhancement Unsuccessful")
+        post["Enhancement"]=False
         pass
 
 @app.get("/enhancement")
@@ -533,9 +595,13 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     URL1 = image_details.url_
     URL = image_details.url_
     logger.info(URL)
+    post["Img_url"]=URL
+    total_req_ext(1)
+    logger.info("Total number of request without ext: {}".format(total_request_extension.count(1)))
     response = requests.get(URL)
     #print(response)
     img = Image.open(BytesIO(response.content))
+    
     #print(img)
     #print(img.format.lower())
 
@@ -568,6 +634,7 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     except Exception as e:
             print(e)
             logger.info("Error: detail=Error while processing the image.")
+            post["Result"]="Unsuccessful"
             raise HTTPException(status_code=500, detail="Error while processing the image.")
     buf.seek(0)
 
@@ -580,7 +647,13 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     
     logger.info("Result: Successful")
     #sample_list.append("successful")
-    
+    s1=sample_list_ext(1)
+    logger.info("Successful Response without ext: {}".format(sample_list_for_without_exten.count(1)))
+    post["Result"]="Successful"
+    try:
+        collection.insert_one(post)
+    except:
+        pass
     
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
@@ -606,14 +679,17 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     #print(img.format.lower())
 
     URL = URL + "." + img.format.lower()
+    #print(URL)
     
     width_percentage = image_details.width_percentage
 
     position = image_details.position
+    #print(position)
 
     filename, original_image = await get_image_properties(URL, width_percentage, position)
+    #print(filename)
     original_image = await get_body(image_details.url_)
-    
+    #print(original_image)
 
     try:
 
