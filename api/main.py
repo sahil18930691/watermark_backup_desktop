@@ -11,10 +11,10 @@ from fastapi.responses import HTMLResponse
 
 import logfile
 from logfile import logger
-'''
+
 import pymongo
 from pymongo import MongoClient
-import certifi'''
+import certifi
 
 import io
 import PIL
@@ -94,13 +94,13 @@ total_request_logo_enhancement=[]
 def total_req_logo_enhancement(k):
     total_request_logo_enhancement.append(k)
     print(total_request_logo_enhancement)
-'''
+
 try:
     cluster=MongoClient("mongodb+srv://kshitij1806:squareyards123@cluster0.vrnbg.mongodb.net/watermark_database?retryWrites=true&w=majority", tlsCAFile=ca)
     db = cluster["watermark_database"]
     collection = db["watermark_collection"]
 except:
-    pass'''
+    pass    
 
 post = {"Img_url": "", "Enhancement": "", "Watermark": "", "Compression": "", "Result":""}
 
@@ -650,11 +650,10 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     s1=sample_list_ext(1)
     logger.info("Successful Response without ext: {}".format(sample_list_for_without_exten.count(1)))
     post["Result"]="Successful"
-    '''
     try:
         collection.insert_one(post)
     except:
-        pass'''
+        pass
     
     return StreamingResponse(buf, media_type=get_content_type(format_), headers={'Content-Disposition': 'inline; filename="%s"' %(filename,)})
 
