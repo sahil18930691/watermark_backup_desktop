@@ -16,6 +16,9 @@ import pymongo
 from pymongo import MongoClient
 import certifi
 
+from dotenv import load_dotenv
+
+
 import io
 import PIL
 from PIL import Image, ImageEnhance
@@ -95,7 +98,11 @@ def total_req_logo_enhancement(k):
     total_request_logo_enhancement.append(k)
     print(total_request_logo_enhancement)
 
-cluster=MongoClient("mongodb+srv://kshitij1806:squareyards123@cluster0.vrnbg.mongodb.net/watermark_database?retryWrites=true&w=majority", tlsCAFile=ca)
+load_dotenv()
+
+connection=os.environ['connection_string']
+
+cluster=MongoClient(connection, tlsCAFile=ca)
 db = cluster["watermark_database"]
 collection = db["watermark_collection"]
 '''
