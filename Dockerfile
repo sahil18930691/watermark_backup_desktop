@@ -1,5 +1,5 @@
 FROM python:3.8
-FROM mongo:latest
+#FROM mongo:latest
 
 # To get output of print statements on console
 ENV PYTHONUNBUFFERED 0
