@@ -29,6 +29,8 @@ COPY api .
 
 # RUN rm -rf ../tests
 
+EXPOSE 27017
+
 ENV PORT="${PORT:-7070}"
 
 # Docker entrypoint
