@@ -12,7 +12,7 @@ WORKDIR /api
 COPY requirements.txt .
 
 # Installing API dependencies other than object detection API and Tensorflow
-RUN pip install pymongo
+#RUN pip install pymongo
 RUN pip install --upgrade pip && pip install --trusted-host pypi.python.org --use-deprecated=legacy-resolver -r requirements.txt
 
 
@@ -29,9 +29,9 @@ COPY api .
 
 # RUN rm -rf ../tests
 
-EXPOSE 27017
+#EXPOSE 27017
 
-ENV PORT="${PORT:-27017}"
+ENV PORT="${PORT:-7070}"
 
 # Docker entrypoint
 CMD gunicorn main:app \

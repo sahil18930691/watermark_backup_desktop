@@ -99,13 +99,15 @@ def total_req_logo_enhancement(k):
     print(total_request_logo_enhancement)
 
 load_dotenv()
-
+'''
 #connection=os.environ['MONGODB_URI']
 connection=os.getenv('MONGODB_URI')
-
 cluster=MongoClient(connection, tlsCAFile=ca)
 db = cluster["watermark_database"]
-collection = db["watermark_collection"]
+collection = db["watermark_collection"]'''
+
+
+
 '''
 try:
     cluster=MongoClient("mongodb+srv://kshitij1806:squareyards123@cluster0.vrnbg.mongodb.net/watermark_database?retryWrites=true&w=majority", tlsCAFile=ca)
@@ -663,7 +665,7 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     logger.info("Successful Response without ext: {}".format(sample_list_for_without_exten.count(1)))
     post["Result"]="Successful"
     
-    collection.insert_one(post)
+    #collection.insert_one(post)
     '''
     
     try:
