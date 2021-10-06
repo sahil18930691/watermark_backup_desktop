@@ -11,13 +11,13 @@ from fastapi.responses import HTMLResponse
 
 import logfile
 from logfile import logger
-'''
+
 import pymongo
 from pymongo import MongoClient
 import certifi
 
 from dotenv import load_dotenv
-'''
+
 
 
 import io
@@ -32,7 +32,7 @@ from fastapi.responses import StreamingResponse
 import uvicorn
 
 
-#ca = certifi.where()
+ca = certifi.where()
 
 SQUARE_YARDS_LOGO = Image.open('./slogo.png')
 IC_LOGO = Image.open('./iclogo2.png')
@@ -99,13 +99,13 @@ def total_req_logo_enhancement(k):
     total_request_logo_enhancement.append(k)
     print(total_request_logo_enhancement)
 
-#load_dotenv()
-'''
-#connection=os.environ['MONGODB_URI']
-connection=os.getenv('MONGODB_URI')
+load_dotenv()
+
+connection=os.environ['MONGODB_URI']
+#connection=os.getenv('MONGODB_URI')
 cluster=MongoClient(connection, tlsCAFile=ca)
 db = cluster["watermark_database"]
-collection = db["watermark_collection"]'''
+collection = db["watermark_collection"]
 
 
 
@@ -666,7 +666,7 @@ async def enhancement_logo_without_ext(image_details: ImageDetails):
     logger.info("Successful Response without ext: {}".format(sample_list_for_without_exten.count(1)))
     post["Result"]="Successful"
     
-    #collection.insert_one(post)
+    collection.insert_one(post)
     '''
     
     try:
