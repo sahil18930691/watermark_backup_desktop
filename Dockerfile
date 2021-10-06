@@ -31,7 +31,7 @@ COPY api .
 
 EXPOSE 27017
 
-ENV PORT="${PORT:-27070}"
+ENV PORT="${PORT:-27017}"
 
 # Docker entrypoint
 CMD gunicorn main:app \
