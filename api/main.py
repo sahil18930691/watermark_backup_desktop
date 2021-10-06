@@ -409,7 +409,7 @@ async def get_body(URL):
             for index in range(0, scale):
                 ratio = histogram[index] / pixels
                 brightness += ratio * (-scale + index)
-
+  
             return 1 if brightness == 255 else brightness / scale
     
         #print("after",calculate_brightness(image))
@@ -587,7 +587,7 @@ async def enhancement(Enhance_image: str):
     image.save(buffer, format=format_, quality=100)
     buffer.seek(0)
     
-    logger.info("Result: Successful")
+    logger.info("Result1: Successful")
     return StreamingResponse(buffer, media_type=get_content_type(format_))
 
 
