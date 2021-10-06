@@ -29,9 +29,9 @@ COPY api .
 
 # RUN rm -rf ../tests
 
-EXPOSE 27017
+#EXPOSE 27017
 
-ENV PORT="${PORT:-7070}"
+ENV PORT="${PORT:-27017}"
 
 # Docker entrypoint
 CMD gunicorn main:app \
