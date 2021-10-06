@@ -101,8 +101,8 @@ def total_req_logo_enhancement(k):
 
 load_dotenv()
 
-connection=os.environ['MONGODB_URI']
-#connection=os.getenv('MONGODB_URI')
+#connection=os.environ['MONGODB_URI']
+connection=os.getenv('MONGODB_URI')
 cluster=MongoClient(connection, tlsCAFile=ca)
 db = cluster["watermark_database"]
 collection = db["watermark_collection"]
