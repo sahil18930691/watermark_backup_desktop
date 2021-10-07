@@ -103,11 +103,11 @@ load_dotenv()
 
 #connection=os.environ['MONGODB_URI']
 #connection=os.getenv('MONGODB_URI')
-cluster=(os.getenv(“MONGODB_URI”, “mongodb://127.0.0.1:27017/database”))
+cluster=pymongo.MongoClient(os.getenv("MONGODB_URI", "mongodb://127.0.0.1:27017/database"))
 #cluster=MongoClient(connection, tlsCAFile=ca)
 db = cluster["watermark_database"]
 collection = db["watermark_collection"]
-
+#"mongodb+srv://kshitij1806:squareyards123@cluster0.vrnbg.mongodb.net:27017/watermark_database?tls=true"
 
 
 '''
